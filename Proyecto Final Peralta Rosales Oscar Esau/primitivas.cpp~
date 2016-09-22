@@ -1,0 +1,260 @@
+#include "main.h"
+//#include "sdlElements.cpp"
+
+//Este archivo incluirá las primitivas para ser llamadas desde archivo main.c
+// desde la función "principal()"
+
+//Los prototipos de las funciones de las primitivas seberán ponerse en main.h
+
+/* ============= Xiaolin Wu's line algorithm =============== */
+
+void plot(double x, double y, double c, int color){
+
+	if(!isValid( (int)x, (int)y) ) return;	
+	
+	int r1,g1,b1,r2,g2,b2,dr,dg,db;
+	int fondo=getpixel((int)x, (int)y);
+	int aux,gradiente=0;
+	
+	//obtener el RGB de la linea
+	aux=color;
+	b1=aux%256;
+	aux/=256;
+	g1=aux%256;
+	aux/=256;
+	r1=aux;   
+
+	//obtener el RGB del fondo
+	aux=fondo;
+	b2=aux%256;
+	aux/=256;
+	g2=aux%256;
+	aux/=256;
+	r2=aux;
+
+	//obtener el gradiente del RGB
+	dr=r2-r1;
+	dr*=(1.0-c);
+	dg=g2-g1;
+	dg*=(1.0-c);
+	db=b2-b1;
+	db*=(1.0-c);
+	gradiente=(b1+db)+(g1+dg)*256+(r1+dr)*256*256;
+	
+	//Dibuja pixel
+	putpixel( (int)x, (int)y, gradiente ); //with brightness c (where 0 ? c ? 1)
+
+}
+ 
+int ipart(double x){
+     return  (int)x; //return  'integer part of x'
+}
+ 
+double round(double x){
+     return ipart(x + 0.5); 
+}
+
+double fpart(double x){
+     int tmp = (int)x;
+     return (double)x-tmp; //return 'fractional part of x'
+}
+ 
+double rfpart(double x){
+     return 1 - fpart(x);
+}
+
+void swap(int &x, int &y){
+     int tmp = x;
+     x = y;
+     y = tmp;
+}
+
+void drawLine(int x0, int y0, int x1, int y1, int color)
+{
+     bool steep = abs(y1 - y0) > abs(x1 - x0);
+ 
+     if(steep){
+         swap(x0, y0);
+         swap(x1, y1);
+     }
+
+     if( x0 > x1 ){
+       swap(x0, x1);
+       swap(y0, y1);
+     }
+ 
+     int dx = x1 - x0;
+     int dy = y1 - y0;
+     double gradient = (double) dy / dx;
+ 
+     // handle first endpoint
+     double xend = round(x0);
+     double yend = y0 + gradient * (xend - x0);
+     double xgap = rfpart(x0 + 0.5);
+     
+     double xpxl1 = xend;   //this will be used in the main loop
+     double ypxl1 = ipart(yend);
+     
+     if( steep ){
+         plot(ypxl1, xpxl1, rfpart(yend) * xgap, color);
+         plot(ypxl1+1, xpxl1,  fpart(yend) * xgap, color);
+     }
+     else{
+         plot(xpxl1, ypxl1  , rfpart(yend) * xgap, color);
+         plot(xpxl1, ypxl1+1,  fpart(yend) * xgap, color);
+     }
+     
+     double intery = yend + gradient ; // first y-intersection for the main loop
+ 
+     // handle second endpoint
+
+     xend = round(x1) ;
+     yend = y1 + gradient * (xend - x1) ;
+     xgap = fpart(x1 + 0.5) ;
+     double xpxl2 = xend ;//this will be used in the main loop
+     double ypxl2 = ipart(yend) ;
+
+     if( steep ){
+         plot(ypxl2  , xpxl2, rfpart(yend) * xgap, color) ;
+         plot(ypxl2+1, xpxl2,  fpart(yend) * xgap, color) ;
+              
+     }
+     else{
+			    // puts("in");
+			   //  printf("%lf %lf %lf\n",xpxl2, ypxl2,  rfpart(yend) * xgap);
+   			  //   printf("%lf %lf %lf\n",xpxl2, ypxl2+1, fpart(yend) * xgap);
+         plot(xpxl2, ypxl2,  rfpart(yend) * xgap, color) ;
+         plot(xpxl2, ypxl2+1, fpart(yend) * xgap, color) ;
+               //puts("out");
+     }
+
+     // main loop 	
+     for( double x = xpxl1 + 1; x <= xpxl2 - 1; x++){
+          
+          if( steep ){
+             plot( (double)ipart(intery), x, rfpart(intery), color) ;
+             plot( (double)ipart(intery)+1, x,  fpart(intery), color) ;
+          }
+          
+         else{
+             plot(x, (double)ipart (intery),  rfpart(intery), color) ;
+             plot(x, (double)ipart (intery)+1, fpart(intery), color) ;
+         }
+         intery = intery + gradient ; 
+              
+     }
+
+
+}
+
+
+/* ============= Circulo =============== */
+
+void drawCircle( int x, int y, int radio, int color )
+{
+	// Se dibuja mediante lineas el rededor del perimetro
+	int x1 = x + radio,y1=y,x2,y2; // punto incial
+	
+	for(int i=0; i<=360; i+=3)
+	{
+		x2 = x + cos(i*3.14159/180)*radio;
+		y2 = y + sin(i*3.14159/180)*radio;
+		drawLine(x1, y1, x2, y2, color);
+		x1 = x2;
+		y1 = y2;
+	}
+}
+
+void drawArc( int x, int y, int radio, int ini, int fin, int color )
+{
+	if(ini>fin)
+		swap(ini,fin);
+
+	int x1 = x + cos(ini*3.14159/180)*radio;
+	int y1 = y + sin(ini*3.14159/180)*radio;
+	int x2,y2;
+
+	for(int i=ini; i<=fin; i+=5)
+	{
+		x2 = x + cos(i*3.14159/180)*radio;
+		y2 = y + sin(i*3.14159/180)*radio;
+		drawLine(x1, y1, x2, y2, color);
+		x1 = x2;
+		y1 = y2;
+	}
+}
+
+
+void drawEspiral(int x, int y, int radio, int ini, double numVueltas, int inc, int color)
+{
+     double gt = 360*numVueltas; 
+     int fin = ini + (int)gt;
+     double radio1 = (double)radio;
+     double salto = (double)inc/360.0;
+     
+     int x1 = x + cos(ini*3.14159/180)*radio1;
+     int y1 = y + sin(ini*3.14159/180)*radio1;
+     int x2,y2;
+
+     for(int i=ini; i<=fin; i++)
+     {
+        x2 = x + cos(i*3.14159/180)*radio1;
+        y2 = y + sin(i*3.14159/180)*radio1;
+	    drawLine(x1, y1, x2, y2, color);
+    	x1 = x2;
+    	y1 = y2;
+        radio1 += salto;
+     }
+}
+
+//Relleno
+void rellena(int x, int y, int color, int fondo )
+{
+     if(getpixel(x,y)!=fondo) return;
+     putpixel(x,y,color);
+     
+     int pos[]={1,0,-1,0,0,1,0,-1};
+     for(int i=0; i<8; i+=2)
+         if( isValid( x+pos[i], y+pos[i+1] ) )
+             rellena(x+pos[i], y+pos[i+1],color,fondo);
+}
+
+void rellena2(int x, int y, int color, int fondo )
+{
+     if(getpixel(x,y)!=fondo) return;
+     int pos[]={1,0,-1,0,0,1,0,-1};
+     if(color==fondo)
+         color = 0x000000;
+     
+     putpixel(x,y,color);
+     queue<int> cola;
+     cola.push(x);
+     cola.push(y);
+     while(!cola.empty())
+     {
+       x = cola.front(); cola.pop();
+       y = cola.front(); cola.pop();
+       for(int i=0; i<8; i+=2)
+         if( isValid( x+pos[i], y+pos[i+1] ) && getpixel( x+pos[i], y+pos[i+1] )==fondo)
+         {
+             putpixel(x+pos[i], y+pos[i+1],color);
+             cola.push(x+pos[i]);
+             cola.push(y+pos[i+1]);
+         }
+     }
+}
+
+//Screen Validations
+bool isValid(int x1, int y1, int x2, int y2)
+{
+     if( x1<winX && x1>=0 && x2<winX && x2>=0 && y1<winY && y1>=0 && y2<winY && y2>=0)
+         return true;
+     return false;
+}
+
+bool isValid(int x1, int y1)
+{
+     if( x1<winX && x1>=0 && y1<winY && y1>=0 )
+         return true;
+     return false;
+}

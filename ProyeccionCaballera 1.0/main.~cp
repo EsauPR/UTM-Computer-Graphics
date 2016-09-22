@@ -1,0 +1,103 @@
+#include "main.h"
+
+void idle();
+void init();
+void checkEvents();
+
+Uint32 ColorG;
+int c,grados;
+int fig1x[5],fig1y[5],fig1z[5];
+
+
+void principal()
+{
+     
+	ColorG= SDL_MapRGB(screen->format, 0,0,255);
+    fig1x[0]=250;
+	fig1y[0]=0;
+	fig1z[0]=20;
+	fig1x[1]=350;
+	fig1y[1]=0;
+	fig1z[1]=20;
+	fig1x[2]=350;
+	fig1y[2]=100;
+	fig1z[2]=20;
+	fig1x[3]=300;//punto de enmedio
+	fig1y[3]=150;//----------------
+	fig1z[3]=20;
+	fig1x[4]=250;
+	fig1y[4]=100;
+	fig1z[4]=20;
+	identidad();
+	escala(0.5,0.5,0);
+	traslada(0,300,0);
+
+	pinta3D(fig1x,fig1y,fig1z,5,ColorG);
+	
+	traslada(400,0,0);
+	rota(120,'y');
+	pinta3D(fig1x,fig1y,fig1z,5,ColorG);
+}
+
+int main(int argc, char *argv[])
+{
+    
+	
+    
+ 	initSDL();
+	init();     //inicializar valores iniciales
+	initText();
+	render();   //dibujar
+	idle();     //se llamará esta función una y otra vez
+
+	return 0;
+}
+
+
+void init()
+{
+	; //aquí se inicializarán datos relacionadas con la aplicación
+}
+
+void checkEvents()
+{
+	// Poll for events, and handle the ones we care about.
+	SDL_Event event;
+	while (SDL_PollEvent(&event)) 
+	{
+		switch (event.type) 
+		{
+		case SDL_KEYDOWN:
+			break;
+		case SDL_KEYUP:
+			// If escape is pressed, return (and thus, quit)
+			if (event.key.keysym.sym == SDLK_ESCAPE)
+				exit( 0 );
+			// Barra espaciadora para encender/apagar animación
+			if( event.key.keysym.sym == SDLK_SPACE )
+				anim = !anim;
+			// 'Z' minúscula para encender/apagar zoom
+			if( event.key.keysym.sym == SDLK_z )
+			{
+				zoom = !zoom;
+				render();
+			}
+			break;
+		case SDL_VIDEORESIZE:
+			winX=event.resize.w; winY=event.resize.h;
+			screen = SDL_SetVideoMode(winX, winY, 32, SDL_SWSURFACE | SDL_RESIZABLE );
+			render();
+			break;
+		case SDL_MOUSEBUTTONDOWN:
+			mouX = event.button.x;
+			mouY = winY - event.button.y;
+			mouse = 1;
+			Boton=(event.button.button==SDL_BUTTON_LEFT)?1:0;//1-boton izq,0-boton der
+			render();
+			break;
+		case SDL_QUIT:
+			exit(0);
+		}
+	}
+}
+

@@ -1,0 +1,109 @@
+#include "main.h"
+//#include "primitivas.cpp"
+#define AZUL 0x29a7e8
+#define ROJO 0xe8292d
+#define AMARILLO 0xe8c629
+
+
+int mouX=0, mouY=0,  mouB, mouse=0;
+long double offx=0.0, offy=0.0, escala=100.0;
+int mcolR, mcolG, mcolB;
+// Prototipos
+void idle();
+void init();
+void checkEvents();
+
+// Poner aquí código para escena
+void principal()
+{
+     /*
+ 	int x=200,y=200,tam=250;
+ 	int color = 0xffffff;
+ 	
+	//for(int i=0; i<=360; i+=3)
+		//drawLine(x, y, x + cos(i*3.14159/180)*tam, y + sin(i*3.14159/180)*tam, color);
+    
+	drawCircle(300,240,200,AZUL);
+	
+	
+	drawArc(300,240,150, 20, 70,ROJO);
+	drawArc(300,240,150, 110, 160,ROJO);
+	drawArc(300,240,150, 200, 250,ROJO);
+	drawArc(300,240,150, 290, 340,ROJO);
+	//*/
+	//x, y, radio, inicio, num vueltas, incremento, color
+	//drawEspiral(300,240,20,0,3.5,30,AMARILLO);
+	
+	drawCircle(300,240,100,AZUL+ROJO);
+	drawCircle(250,290,100,AZUL+ROJO);
+	drawCircle(350,290,100,AZUL+ROJO);
+	drawCircle(250,190,100,AZUL+ROJO);
+	drawCircle(350,190,100,AZUL+ROJO);
+	
+	if(mouse){
+	         rellena2(mouX,mouY,AZUL*mouX+ROJO*mouY,getpixel(mouX,mouY));
+	         mouse=0;
+    }
+}
+
+// Entry point
+int main(int argc, char *argv[])
+{
+
+	initSDL();
+	init();     //inicializar valores iniciales
+	render();   //dibujar
+	idle();     //se llamará esta función una y otra vez
+
+	return 0;
+}
+
+
+void init()
+{
+	
+}
+
+void checkEvents()
+{
+	// Poll for events, and handle the ones we care about.
+	SDL_Event event;
+	while (SDL_PollEvent(&event)) 
+	{
+		switch (event.type) 
+		{
+		case SDL_KEYDOWN:
+			break;
+		case SDL_KEYUP:
+			// If escape is pressed, return (and thus, quit)
+			if (event.key.keysym.sym == SDLK_ESCAPE)
+				exit( 0 );
+			// Barra espaciadora para encender/apagar animación
+			if( event.key.keysym.sym == SDLK_SPACE )
+				anim = !anim;
+			// 'Z' minúscula para encender/apagar zoom
+			if( event.key.keysym.sym == SDLK_z )
+			{
+				zoom = !zoom;
+				render();
+			}
+			break;
+		case SDL_VIDEORESIZE:
+			winX=event.resize.w; winY=event.resize.h;
+			screen = SDL_SetVideoMode(winX, winY, 32, SDL_SWSURFACE | SDL_RESIZABLE );
+			render();
+			break;
+			
+	   case SDL_MOUSEBUTTONDOWN:
+            mouX= event.button.x;
+            mouY=winY-event.button.y;
+            mouse=1;
+            mouB=(event.button.button==SDL_BUTTON_LEFT)? 0 : 1;
+            render();	
+            break;	
+		case SDL_QUIT:
+			exit(0);
+		}
+	}
+}
+

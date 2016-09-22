@@ -1,0 +1,64 @@
+#include <stdlib.h>
+#include <math.h>
+#include <algorithm>
+#if defined(_MSC_VER)
+ #include <SDL.h>
+#else
+ #include <SDL/SDL.h>
+#endif
+
+//Para winZoom
+#define	ZWX	200
+#define ZWY	200
+#define ZWP	10
+
+// Physics iterations per second
+#define PHYSICSFPS 30
+
+using namespace std;
+
+//Tamańo de pantalla
+extern int winX, winY;	//tamańo ventana
+extern int gLastTick, anim, zoom;
+extern SDL_Surface *screen;
+
+//Prototipos de PRIMITIVAS
+void putpixel(int x, int y, int color);
+int getpixel( int x, int y );
+void winZoom();
+
+// Lines
+void plot(double x, double y, double c, int color); 
+int ipart(double x);
+double round(double x);
+double fpart(double x);
+double rfpart(double x);
+void swap(int &x, int &y);
+void drawLine(int x0, int y0, int x1, int y1, int color);
+
+//Circulo
+//x, y, inicio, radio, color
+void drawCircle( int x, int y, int radio, int color  );
+
+//Arc
+//x, y, inicio, radio, inicio, fin. color
+void drawArc( int x, int y, int radio, int ini, int fin, int color );
+
+//espiral
+//x, y, radio, inicio, num vueltas, incremento, color
+void drawEspiral(int x, int y, int radio, int ini, double numVueltas, int inc, int color);
+
+
+//Screen Validations
+
+bool isValid(int x1, int y1, int x2, int y2);
+bool isValid(int x1, int y1);
+
+//Prototipos inicializacion 
+void initSDL();
+void render();
+void idle();
+
+//Prototipos de MAIN
+void principal();
+void checkEvents();
